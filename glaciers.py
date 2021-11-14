@@ -7,14 +7,20 @@ class Glacier:
         self.lat=lat
         self.lon=lon
         self.code=code
+        self.mass_balance_measurement=[]
 
         
 
     def add_mass_balance_measurement(self, year, mass_balance,partial_measurement):
-        raise NotImplementedError
+        balance_measure=[year,mass_balance,partial_measurement]
+        self.mass_balance_measurement.append(balance_measure)
+        print(self.mass_balance_measurement[0])
 
     def plot_mass_balance(self, output_path):
         raise NotImplementedError
+    
+    def get_id(self):
+        return self.glacier_id
 
         
 
@@ -31,8 +37,12 @@ class GlacierCollection:
              next(reader)
             #  lines=len(list(reader))
              for row in reader:
-                Glacier_object=Glacier(row[2],row[1],row[0],row[5],row[6],row[14])
+                digit_str=row[7]+row[8]+row[9]
+                digit=int(digit_str)
+                Glacier_object=Glacier(row[2],row[1],row[0],float(row[5]),float(row[6]),digit)
                 self.collectionObject.append(Glacier_object)
+                
+        print(0)
                 
         
         
@@ -41,7 +51,18 @@ class GlacierCollection:
         
 
     def read_mass_balance_data(self, file_path):
-        raise NotImplementedError
+        with file_path.open() as file:
+            reader=csv.reader(file)
+            next(reader)
+            for row in reader:
+                id=row[2]
+                for glacier in self.collectionObject:
+                    if glacier.get_id()==id:
+                        glacier.add_mass_balance_measurement(row[3],row[11],row[6])
+                
+        print(0)
+
+
 
     def find_nearest(self, lat, lon, n):
         """Get the n glaciers closest to the given coordinates."""
@@ -65,6 +86,8 @@ class GlacierCollection:
 def main():
     file_path = Path("sheet-A.csv")
     collection = GlacierCollection(file_path)
+    file_path_2=Path("sheet-EE.csv")
+    collection.read_mass_balance_data(file_path_2)
 
 if __name__ == "__main__":
     main()
