@@ -15,8 +15,9 @@ class Glacier:
         
 
     def add_mass_balance_measurement(self, year, mass_balance,partial_measurement):
-        balance_measure=[year,mass_balance,partial_measurement]
-        self.mass_balance_measurement.append(balance_measure)
+        if validation_for_year(float(year)):
+            balance_measure=[year,mass_balance,partial_measurement]
+            self.mass_balance_measurement.append(balance_measure)
 
 
     def plot_mass_balance(self, output_path):
@@ -40,6 +41,46 @@ class Glacier:
 from pathlib import Path
 import csv
 
+def validation_for_glacier(id,latitude,lontitude,unit):
+    def is_number(s):
+            try:
+                int(s)
+            except ValueError:
+                return False
+            return True
+    if not(is_number(id)):
+        return False
+    if is_number(id):
+        if len(id)!=5:
+            return False
+    if latitude>90 or latitude<-90 or lontitude>180 or lontitude<-180:
+        return False
+    if len(unit)!=2 and unit!=99:
+        return False
+    return True
+
+def validation_for_measurement(unit,id,year):
+    def is_number(s):
+            try:
+                int(s)
+            except ValueError:
+                return False
+            return True
+    if not(is_number(id)):
+        return False
+    if is_number(id):
+        if len(id)!=5:
+            return False
+    if len(unit)!=2 and unit!=99:
+        return False
+    if year>2021 or not(year.is_integer()):
+        return False
+    return True
+
+def validation_for_year(year):
+    if year>2021 or not(year.is_integer()):
+        return False
+    return True
 class GlacierCollection:
 
     def __init__(self, file_path):
@@ -52,8 +93,9 @@ class GlacierCollection:
              for row in reader:
                 digit_str=row[7]+row[8]+row[9]
                 digit=int(digit_str)
-                Glacier_object=Glacier(row[2],row[1],row[0],float(row[5]),float(row[6]),digit)
-                self.collectionObject.append(Glacier_object)
+                if(validation_for_glacier(row[2],float(row[5]),float(row[6]),row[0])):
+                    Glacier_object=Glacier(row[2],row[1],row[0],float(row[5]),float(row[6]),digit)
+                    self.collectionObject.append(Glacier_object)
                 
         print(0)
                 
@@ -64,6 +106,7 @@ class GlacierCollection:
         
 
     def read_mass_balance_data(self, file_path):
+        match_indication=0
         with file_path.open() as file:
             reader=csv.reader(file)
             next(reader)
@@ -71,7 +114,12 @@ class GlacierCollection:
                 id=row[2]
                 for glacier in self.collectionObject:
                     if glacier.get_id()==id:
-                        glacier.add_mass_balance_measurement(row[3],row[11],row[6])
+                        if validation_for_measurement(row[0],row[2],float(row[3])):
+                            glacier.add_mass_balance_measurement(row[3],row[11],row[6])
+                        match_indication=1
+                if match_indication==0:
+                    print("no matching id for ",id)
+                match_indication=0
                 
         print(0)
 
