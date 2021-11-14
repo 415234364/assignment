@@ -1,4 +1,7 @@
 
+from numpy.lib.npyio import loadtxt
+import utils
+
 class Glacier:
     def __init__(self, glacier_id, name, unit, lat, lon, code):
         self.glacier_id=glacier_id
@@ -24,7 +27,14 @@ class Glacier:
     
     def get_code(self):
         return self.code
-
+    def get_latitude(self):
+        return self.lat
+    def get_lontitude(self):
+        return self.lon
+    def get_name(self):
+        return self.name
+    def get_mass(self):
+        return self.mass_balance_measurement
         
 
 from pathlib import Path
@@ -69,7 +79,24 @@ class GlacierCollection:
 
     def find_nearest(self, lat, lon, n):
         """Get the n glaciers closest to the given coordinates."""
-        raise NotImplementedError
+        temp_collection=[]
+        for glacier in self.collectionObject:
+            
+            lat_2=glacier.get_latitude()
+            lon_2=glacier.get_lontitude()
+            temp=[glacier,utils.haversine_distance(lat,lon,lat_2,lon_2)]
+            temp_collection.append(temp)
+        
+        def takeSecond(elem):
+            return elem[1]
+        temp_collection.sort(key=takeSecond)
+        topn=temp_collection[:n]
+        name=[]
+        for entry in topn:
+            name.append(entry[0].get_name())
+        return name
+
+
     
     def filter_by_code(self, code_pattern):
         """Return the names of glaciers whose codes match the given pattern."""
@@ -104,10 +131,71 @@ class GlacierCollection:
 
     def sort_by_latest_mass_balance(self, n, reverse):
         """Return the N glaciers with the highest area accumulated in the last measurement."""
-        raise NotImplementedError
+        temp_collection=[]
+        def sortbyyear(elem):
+            return int(elem[0])
+        def is_number(s):
+            try:
+                float(s)
+            except ValueError:
+                return False
+            return True
+        for glacier in self.collectionObject:
+            if glacier.get_mass() :
+                mass_measurement=glacier.get_mass()
+                mass_measurement.sort(key=sortbyyear,reverse=True)
+                value=mass_measurement[0][1]
+                if is_number(value):
+                    temp=[glacier,float(value)]
+                    temp_collection.append(temp)
+
+        def sortbySecond(elem):
+            return elem[1]
+        if reverse==0:
+            temp_collection.sort(key=sortbySecond)
+        else :
+            temp_collection.sort(key=sortbySecond,reverse=True)
+        topn=temp_collection[:n]
+        glacier_object=[]
+        for entry in topn:
+            glacier_object.append(entry[0])
+        return glacier_object
+
+
 
     def summary(self):
-        raise NotImplementedError
+        def sortbyyear(elem):
+            return int(elem[0])
+        def is_number(s):
+            try:
+                float(s)
+            except ValueError:
+                return False
+            return True
+        number=len(self.collectionObject)
+        print("this collection has ",number," glaciers")
+        earliest_year=3000
+        number_of_decay=0
+        number_of_recording=0
+        for glacier in self.collectionObject:
+            if glacier.get_mass():
+                number_of_recording=number_of_recording+1
+                mass_measurent=glacier.get_mass()
+                for entry in mass_measurent:
+                    year=entry[0]
+                    if is_number(year):
+                        if(int(year)<earliest_year):
+                            earliest_year=int(year)
+               
+                mass_measurent.sort(key=sortbyyear,reverse=True)
+                value=mass_measurent[0][1]
+                if is_number(value):
+                     if float(value)<0:
+                        number_of_decay=number_of_decay+1
+
+        percent=round(number_of_decay/number_of_recording*100)
+        print("The earliest measurement was in ",earliest_year)
+        print(percent,"% of glacier shrunk in their last measurement ")
 
     def plot_extremes(self, output_path):
         raise NotImplementedError
@@ -116,9 +204,12 @@ class GlacierCollection:
 def main():
     file_path = Path("sheet-A.csv")
     collection = GlacierCollection(file_path)
-    # file_path_2=Path("sheet-EE.csv")
-    # collection.read_mass_balance_data(file_path_2)
-    collection.filter_by_code(638)
+    file_path_2=Path("sheet-EE.csv")
+    collection.read_mass_balance_data(file_path_2)
+    # collection.filter_by_code(638)
+    # collection.find_nearest(0,0,5)
+    # collection.sort_by_latest_mass_balance(5,1)
+    collection.summary()
 
 if __name__ == "__main__":
     main()
