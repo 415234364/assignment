@@ -14,13 +14,16 @@ class Glacier:
     def add_mass_balance_measurement(self, year, mass_balance,partial_measurement):
         balance_measure=[year,mass_balance,partial_measurement]
         self.mass_balance_measurement.append(balance_measure)
-        print(self.mass_balance_measurement[0])
+
 
     def plot_mass_balance(self, output_path):
         raise NotImplementedError
     
     def get_id(self):
         return self.glacier_id
+    
+    def get_code(self):
+        return self.code
 
         
 
@@ -70,7 +73,34 @@ class GlacierCollection:
     
     def filter_by_code(self, code_pattern):
         """Return the names of glaciers whose codes match the given pattern."""
-        raise NotImplementedError
+        code_pattern=str(code_pattern)
+        first_digit=code_pattern[0]
+        second_digit=code_pattern[1]
+        third_digit=code_pattern[2]
+        first_iteration=[]
+        second_iteration=[]
+        third_iteration=[]
+        for entry in self.collectionObject:
+            code=entry.get_code()
+            code_str=str(code)
+            first_code=code_str[0]
+            if(first_code==first_digit or first_code=='?'):
+                first_iteration.append(entry)
+        for entry in first_iteration:
+            code=entry.get_code()
+            code_str=str(code)
+            second_code=code_str[1]
+            if(second_code==second_digit or second_code=='?'):
+                second_iteration.append(entry)
+        for entry in second_iteration:
+            code=entry.get_code()
+            code_str=str(code)
+            third_code=code_str[2]
+            if(third_code==third_digit or third_code=='?'):
+                third_iteration.append(entry)
+        
+        return third_iteration
+
 
     def sort_by_latest_mass_balance(self, n, reverse):
         """Return the N glaciers with the highest area accumulated in the last measurement."""
@@ -86,8 +116,9 @@ class GlacierCollection:
 def main():
     file_path = Path("sheet-A.csv")
     collection = GlacierCollection(file_path)
-    file_path_2=Path("sheet-EE.csv")
-    collection.read_mass_balance_data(file_path_2)
+    # file_path_2=Path("sheet-EE.csv")
+    # collection.read_mass_balance_data(file_path_2)
+    collection.filter_by_code(638)
 
 if __name__ == "__main__":
     main()
