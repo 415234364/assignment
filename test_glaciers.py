@@ -1,4 +1,5 @@
 from glaciers import *
+from pytest import raises
 
 def main():
     file_path = Path("sheet-A.csv")
@@ -19,6 +20,12 @@ def test_filter():
     print(*filter_collection)
     filter_collection_2=collection.filter_by_code('6?8')
 
-if __name__ == "__main__":
-    # main()
-    test_filter()
+def Test_validation_for_glacier_fall_on_non_5_length_id():
+      with raises(ValueError) as exception: 
+          validation_for_glacier('1444',0,0,0)
+    
+def Test_validation_for_glacier_fall_on_non_valid_latitude():
+      with raises(ValueError) as exception: 
+         validation_for_glacier('14444',-190,0,0)
+
+    
