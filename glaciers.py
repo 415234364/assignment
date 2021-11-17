@@ -1,7 +1,14 @@
 
+from typing import Type
 from numpy.lib.npyio import loadtxt
 import utils
+import matplotlib.pyplot as plt
+import os
 
+def validation_for_year(year):
+    if year>2021 or not(year.is_integer()):
+        raise ValueError("year should be an integer and not in the future")
+    return True
 class Glacier:
     def __init__(self, glacier_id, name, unit, lat, lon, code):
         self.glacier_id=glacier_id
@@ -21,7 +28,45 @@ class Glacier:
 
 
     def plot_mass_balance(self, output_path):
-        raise NotImplementedError
+        def sortbyyear(elem):
+            return int(elem[0])
+        def is_number(s):
+            try:
+                int(s)
+            except ValueError:
+                return False
+            return True
+        self.mass_balance_measurement.sort(key=sortbyyear)
+        year=[]
+        value=[]
+        if self.mass_balance_measurement:
+            year.append(self.mass_balance_measurement[0][0])
+            value.append(int(self.mass_balance_measurement[0][1]))
+            for entry in self.mass_balance_measurement[1:]:
+                if entry[0]!=year[-1]:
+                    year.append(entry[0])
+                    if is_number(entry[1]):
+                        value.append(int(entry[1]))
+                    else:
+                        value.append(0)
+                else:
+                    if is_number(entry[1]):
+                         value[-1]+=int(entry[1])
+        else:
+            print("the mass balance measurement is empty")
+
+        plt.plot(year,value)
+        plt.xlabel("year")
+        plt.ylabel("mass balance measurement")
+        plt.title("mass balance measurement of "+self.name+" glacier")
+        plt.xticks(fontsize=10)
+        for i, txt in enumerate(value):
+            plt.annotate(txt,(year[i],value[i]))
+        plt.savefig(output_path+"image_of_"+self.name+".png",dpi=300)
+        plt.show()
+        plt.clf()
+        
+
     
     def get_id(self):
         return self.glacier_id
@@ -67,20 +112,17 @@ def validation_for_measurement(unit,id,year):
                 return False
             return True
     if not(is_number(id)):
-        return False
+        raise TypeError("id should be a number")
     if is_number(id):
         if len(id)!=5:
-            return False
+            raise ValueError("id should be a number with length of 5")
     if len(unit)!=2 and unit!=99:
-        return False
+        raise ValueError("length of unit should be 2 or unit could be 99")
     if year>2021 or not(year.is_integer()):
-        return False
+        raise ValueError("year should be an integer and not in the future")
     return True
 
-def validation_for_year(year):
-    if year>2021 or not(year.is_integer()):
-        return False
-    return True
+
 class GlacierCollection:
 
     def __init__(self, file_path):
@@ -102,25 +144,67 @@ class GlacierCollection:
         
         
 
-                
+    def plot_extremes(self,output_path):
+        temp_collection=[]
+        def sortbyyear(elem):
+            return int(elem[0])
+        def is_number(s):
+            try:
+                float(s)
+            except ValueError:
+                return False
+            return True
+        for glacier in self.collectionObject:
+            if glacier.get_mass() :
+                mass_measurement=glacier.get_mass()
+                mass_measurement.sort(key=sortbyyear,reverse=True)
+                value=mass_measurement[0][1]
+                if is_number(value):
+                    temp=[glacier,float(value)]
+                    temp_collection.append(temp)
+
+        def sortbySecond(elem):
+            return elem[1]
+
+        temp_collection.sort(key=sortbySecond)
+        top=temp_collection[0]
+        last=temp_collection[-1]
+        glacier_object=[]
+
+        glacier_object.append(top[0])
+        glacier_object.append(last[0])
+        top[0].plot_mass_balance(output_path)
+        last[0].plot_mass_balance(output_path)
+        return glacier_object
         
 
     def read_mass_balance_data(self, file_path):
+        partial_indication=0
         match_indication=0
+        pre_row=[0,0,0,0]
         with file_path.open() as file:
             reader=csv.reader(file)
             next(reader)
             for row in reader:
+                
                 id=row[2]
                 for glacier in self.collectionObject:
                     if glacier.get_id()==id:
                         if validation_for_measurement(row[0],row[2],float(row[3])):
-                            glacier.add_mass_balance_measurement(row[3],row[11],row[6])
+                            if(int(row[5])!=9999):
+                                partial_indication=1
+                            else:
+                                partial_indication=0
+                            if partial_indication==0:
+                                if row[3]!=pre_row[3]:
+                                    glacier.add_mass_balance_measurement(row[3],row[11],partial_indication)
+                            else:
+                                glacier.add_mass_balance_measurement(row[3],row[11],partial_indication)
                         match_indication=1
                 if match_indication==0:
                     print("no matching id for ",id)
                 match_indication=0
-                
+                pre_row=row
         print(0)
 
 
@@ -245,8 +329,7 @@ class GlacierCollection:
         print("The earliest measurement was in ",earliest_year)
         print(percent,"% of glacier shrunk in their last measurement ")
 
-    def plot_extremes(self, output_path):
-        raise NotImplementedError
+    
 
 
 def main():
@@ -257,7 +340,10 @@ def main():
     # collection.filter_by_code(638)
     # collection.find_nearest(0,0,5)
     # collection.sort_by_latest_mass_balance(5,1)
+    a="E:/repository/"
+    collection.collectionObject[0].plot_mass_balance(a)
     collection.summary()
+    collection.plot_extremes(a)
 
 if __name__ == "__main__":
     main()
