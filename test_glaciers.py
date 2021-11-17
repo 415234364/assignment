@@ -20,12 +20,17 @@ def test_filter():
     print(*filter_collection)
     filter_collection_2=collection.filter_by_code('6?8')
 
-def Test_validation_for_glacier_fall_on_non_5_length_id():
+def test_validation_for_glacier_fail_on_non_5_length_id():
       with raises(ValueError) as exception: 
           validation_for_glacier('1444',0,0,0)
     
-def Test_validation_for_glacier_fall_on_non_valid_latitude():
+def test_validation_for_glacier_fail_on_non_valid_latitude():
       with raises(ValueError) as exception: 
          validation_for_glacier('14444',-190,0,0)
-
+def test_validation_for_glacier_fail_on_non_number_id():
+    with raises(TypeError) as exception:
+         validation_for_glacier('jimmy',0,0,0)
+def test_validation_for_glacier_fail_on_non_valid_unit():
+    with raises(ValueError) as exception:
+         validation_for_glacier('14444',0,0,'aed')
     

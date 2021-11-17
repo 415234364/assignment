@@ -49,14 +49,14 @@ def validation_for_glacier(id,latitude,lontitude,unit):
                 return False
             return True
     if not(is_number(id)):
-        return False
+        raise TypeError("id should be a number")
     if is_number(id):
         if len(id)!=5:
             raise ValueError("id should be a number with length of 5")
     if latitude>90 or latitude<-90 or lontitude>180 or lontitude<-180:
         raise ValueError("latitude should be in range of (-90,90),lontitude should be in range of (-180,180) ")
     if len(unit)!=2 and unit!=99:
-        return False
+        raise ValueError("length of unit should be 2 or unit could be 99")
     return True
 
 def validation_for_measurement(unit,id,year):
