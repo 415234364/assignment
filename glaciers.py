@@ -81,6 +81,9 @@ class Glacier:
         return self.name
     def get_mass(self):
         return self.mass_balance_measurement
+
+    def get_glacier(self):
+        return [self.glacier_id,self.name,self.unit,self.lat,self.lon,self.code]
         
 
 from pathlib import Path
@@ -243,19 +246,19 @@ class GlacierCollection:
             code=entry.get_code()
             code_str=str(code)
             first_code=code_str[0]
-            if(first_code==first_digit or first_code=='?'):
+            if(first_code==first_digit or first_digit=='?'):
                 first_iteration.append(entry)
         for entry in first_iteration:
             code=entry.get_code()
             code_str=str(code)
             second_code=code_str[1]
-            if(second_code==second_digit or second_code=='?'):
+            if(second_code==second_digit or second_digit=='?'):
                 second_iteration.append(entry)
         for entry in second_iteration:
             code=entry.get_code()
             code_str=str(code)
             third_code=code_str[2]
-            if(third_code==third_digit or third_code=='?'):
+            if(third_code==third_digit or third_digit=='?'):
                 third_iteration.append(entry)
         
         return third_iteration
