@@ -125,6 +125,11 @@ def validation_for_measurement(unit,id,year):
         raise ValueError("year should be an integer and not in the future")
     return True
 
+def validation_for_code_pattern(code_pattern):
+    if len(code_pattern!=3):
+        raise ValueError("code should be the length of 3")
+    return True
+
 
 class GlacierCollection:
 
