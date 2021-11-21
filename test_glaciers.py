@@ -71,7 +71,11 @@ def test_validation_for_identifier():
         validation_for_identifier("123456")
     with raises(ValueError) as exception:
         validation_for_identifier("12?45")
-        
+
+def test_validation_for_mass_balance():
+    with raises(ValueError) as exception:
+        validation_for_mass_balance_value("?100")
+
 def test_add_partial_mass_balance_measurement():
     file_path = Path("test-sheet-A.csv")
     collection = GlacierCollection(file_path)

@@ -143,6 +143,10 @@ def validation_for_identifier(identifier):
         raise ValueError("identifier should be all digit")
     return True
 
+def validation_for_mass_balance_value(mass_balance_value):
+    if not(mass_balance_value.lstrip('-').isdigit() or mass_balance_value==''):
+        raise ValueError("mass_balance_value should be valid number")
+    return True
 class GlacierCollection:
 
     def __init__(self, file_path):
@@ -211,6 +215,7 @@ class GlacierCollection:
                 id=row[2]
                 for glacier in self.collectionObject:
                     if glacier.get_id()==id:
+                        validation_for_mass_balance_value(row[11])
                         if validation_for_measurement(row[0],row[2],float(row[3])):
                             if(int(row[5])!=9999):
                                 partial_indication=1
@@ -223,7 +228,8 @@ class GlacierCollection:
                                 glacier.add_mass_balance_measurement(row[3],row[11],partial_indication)
                         match_indication=1
                 if match_indication==0:
-                    print("no matching id for ",id)
+                   raise ValueError("identifier is not recognized")
+                    
                 match_indication=0
                 pre_row=row
         print(0)
