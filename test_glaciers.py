@@ -21,34 +21,57 @@ def test_validation_for_glacier_fail_on_non_5_length_id():
 def test_validation_for_glacier_fail_on_non_valid_latitude():
     with raises(ValueError) as exception: 
          validation_for_glacier('14444',-190,0,0)
+
 def test_validation_for_glacier_fail_on_non_number_id():
     with raises(TypeError) as exception:
          validation_for_glacier('jimmy',0,0,0)
+
 def test_validation_for_glacier_fail_on_non_valid_unit():
     with raises(ValueError) as exception:
          validation_for_glacier('14444',0,0,'aed')
+
 def test_validation_for_measurement_fail_on_non_number_id():
     with raises(TypeError) as exception:
         validation_for_measurement('sr','jimmy',2002)
+
 def test_validation_for_measurement_fail_on_non_5_length_id():
     with raises(ValueError) as exception:
         validation_for_measurement('sr','12',2002)
+
 def test_validation_for_measurement_fail_on_non_valid_unit():
     with raises(ValueError) as exception:
          validation_for_measurement('srs','12',2002)
+
 def test_validation_for_measurement_fail_on_future_year():
     with raises(ValueError) as exception:
         validation_for_measurement('srs','12',20222)
+
 def test_validation_for_measurement_fail_on_non_integer_year():
     with raises(ValueError) as exception:
         validation_for_measurement('srs','12',2020.2)
+
 def test_validation_for_year_fail_on_future_year():
     with raises(ValueError) as exception:
         validation_for_year(20222)
+
 def test_validation_for_year_fail_on_non_integer_year():
     with raises(ValueError) as exception:
         validation_for_year(2020.2)
 
+def test_validation_for_code_length_not_3():
+    with raises(ValueError) as exception:
+        validation_for_code_pattern(1234)
+
+def test_validation_for_code_first_character_not_available():
+    with raises(ValueError) as exception:
+        validation_for_code_pattern(".12")
+
+def test_validation_for_identifier():
+    with raises(ValueError) as exception:
+        validation_for_identifier("123456")
+    with raises(ValueError) as exception:
+        validation_for_identifier("12?45")
+        
 def test_add_partial_mass_balance_measurement():
     file_path = Path("test-sheet-A.csv")
     collection = GlacierCollection(file_path)

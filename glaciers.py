@@ -126,10 +126,22 @@ def validation_for_measurement(unit,id,year):
     return True
 
 def validation_for_code_pattern(code_pattern):
-    if len(code_pattern!=3):
+    if len(str(code_pattern))!=3:
         raise ValueError("code should be the length of 3")
+    if (str(code_pattern)[0]!="?" and not(str(code_pattern)[0].isdigit())):
+        raise ValueError("the first character needs to be ? or digit")
+    if (str(code_pattern)[1]!="?" and not(str(code_pattern)[1].isdigit())):
+        raise ValueError("the first character needs to be ? or digit")
+    if (str(code_pattern)[2]!="?" and not(str(code_pattern)[2].isdigit())):
+        raise ValueError("the first character needs to be ? or digit")
     return True
 
+def validation_for_identifier(identifier):
+    if len(str(identifier))!=5:
+        raise ValueError("identifier should be the length of 5")
+    if not(str(identifier).isdigit()):
+        raise ValueError("identifier should be all digit")
+    return True
 
 class GlacierCollection:
 
@@ -143,6 +155,7 @@ class GlacierCollection:
              for row in reader:
                 digit_str=row[7]+row[8]+row[9]
                 digit=int(digit_str)
+                validation_for_identifier(row[2])
                 if(validation_for_glacier(row[2],float(row[5]),float(row[6]),row[0])):
                     Glacier_object=Glacier(row[2],row[1],row[0],float(row[5]),float(row[6]),digit)
                     self.collectionObject.append(Glacier_object)
@@ -241,6 +254,7 @@ class GlacierCollection:
     def filter_by_code(self, code_pattern):
         """Return the names of glaciers whose codes match the given pattern."""
         code_pattern=str(code_pattern)
+        validation_for_code_pattern(code_pattern)
         first_digit=code_pattern[0]
         second_digit=code_pattern[1]
         third_digit=code_pattern[2]
