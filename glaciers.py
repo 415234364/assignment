@@ -285,8 +285,10 @@ class GlacierCollection:
             third_code=code_str[2]
             if(third_code==third_digit or third_digit=='?'):
                 third_iteration.append(entry)
-        
-        return third_iteration
+        name=[]
+        for entry in third_iteration:
+            name.append(entry.get_name())
+        return name
 
 
     def sort_by_latest_mass_balance(self, n, reverse):
@@ -368,7 +370,7 @@ def main():
     # collection.filter_by_code(638)
     # collection.find_nearest(0,0,5)
     # collection.sort_by_latest_mass_balance(5,1)
-    a="E:/repository/"
+    a="E:/repository/image.png"
     collection.collectionObject[0].plot_mass_balance(a)
     collection.summary()
     collection.plot_extremes(a)
