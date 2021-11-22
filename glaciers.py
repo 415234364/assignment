@@ -62,7 +62,7 @@ class Glacier:
         plt.xticks(fontsize=10)
         for i, txt in enumerate(value):
             plt.annotate(txt,(year[i],value[i]))
-        plt.savefig(output_path+"image_of_"+self.name+".png",dpi=300)
+        plt.savefig(output_path,dpi=300)
         plt.show()
         plt.clf()
         

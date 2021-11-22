@@ -120,6 +120,14 @@ def test_sort_by_latest_mass_balance():
     assert len(temp_object_2)==1
     assert temp_object_2[0].get_glacier()==['04532','AGUA NEGRA','AR',-30.16490,-69.80940,638]
 
-    
+def test_plot_glacier():
+    file_path = Path("test-sheet-A-sort.csv")
+    collection = GlacierCollection(file_path)
+    sample_glacier=collection.collectionObject[0]
+    sample_glacier.add_mass_balance_measurement(2010, -10, False)
+    sample_glacier.add_mass_balance_measurement(2011, -20, False)
+    sample_glacier.add_mass_balance_measurement(2012, -30, False)
+    sample_glacier.plot_mass_balance("E:/repository/image.png")
+    print(0)
 if __name__ == "__main__":
-    test_filter()
+    test_plot_glacier()
